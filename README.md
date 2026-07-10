@@ -32,10 +32,8 @@ ComfyUI-Dynamic-Dropdowns/
     ├── generator.html           # Desktop interface panel
     ├── requirements.txt         # Dev build dependencies
     └── build.py                 # Isolated one-click .exe compiler
-⚙️ Installation GuideStandard User InstallationDownload this repository or clone it directly into your ComfyUI nodes directory:Bashcd ComfyUI/custom_nodes
-git clone [https://github.com/YOUR_USERNAME/ComfyUI-Dynamic-Dropdowns.git](https://github.com/YOUR_USERNAME/ComfyUI-Dynamic-Dropdowns.git)
-Navigate inside the ComfyUI-Dynamic-Dropdowns directory and create an empty folder named lists.Drop your text-attribute files (e.g., outfits.txt, hairstyles.txt) inside that lists/ folder. Ensure text files feature exactly one choice per line, with no blank trailing lines.Launch or restart ComfyUI.🚀 How to Use1. Generating or Updating Nodes via the Companion AppIf you want to configure what dropdown columns display inside ComfyUI:Double-click Node Builder Assistant.exe right in the root directory.Click + Add Dropdown Menu for each menu attribute slot you wish to manage.Assign the text label name (e.g., hair_color) and match it exactly to the .txt file name located inside your lists/ folder.Click Build Custom Node to generate the node logic.Click Download Code, save the file, and name it exactly __init__.py, replacing the existing script in the root folder.2. Canvas Workflow MappingInside the ComfyUI grid canvas interface:Right-click anywhere and locate your node via Custom Selection -> Universal Text Selector (or your custom display title).Wire your primary CLIP pipeline dot from your Model Loader directly into the node's clip input dot on the left.Route your outputs on the right side:PROMPT_STRING $\rightarrow$ Connect this to prompt text combiners, custom wildcards, or visual display text debuggers.CONDITIONING $\rightarrow$ Route this dot directly into your KSampler (positive / negative) inputs, instantly bypassing standard text box nodes.🛠️ Developer / Compilation SetupIf you want to modify the companion app layout styles or tweak the core source generation engine:Make your code alterations inside generator/generator.html or generator/app.py.Open your command terminal inside the /generator folder and execute the one-click compilation automator script:Bashpython build.py
-This script dynamically sets up an isolated Python virtual environment, installs the compression assets, strips module bloat, compiles the new optimized binary, moves it directly to the root path as Node Builder Assistant.exe, and purges temporary cache files automatically.
+---text
+
 
 ## ⚙️ Installation Guide
 
@@ -44,46 +42,3 @@ This script dynamically sets up an isolated Python virtual environment, installs
    ```bash
    cd ComfyUI/custom_nodes
    git clone [https://github.com/YOUR_USERNAME/ComfyUI-Dynamic-Dropdowns.git](https://github.com/YOUR_USERNAME/ComfyUI-Dynamic-Dropdowns.git)
-Navigate inside the ComfyUI-Dynamic-Dropdowns directory and create an empty folder named lists.
-
-Drop your text-attribute files (e.g., outfits.txt, hairstyles.txt) inside that lists/ folder. Ensure text files feature exactly one choice per line, with no blank trailing lines.
-
-Launch or restart ComfyUI.
-
-🚀 How to Use
-1. Generating or Updating Nodes via the Companion App
-If you want to configure what dropdown columns display inside ComfyUI:
-
-Double-click Node Builder Assistant.exe right in the root directory.
-
-Click + Add Dropdown Menu for each menu attribute slot you wish to manage.
-
-Assign the text label name (e.g., hair_color) and match it exactly to the .txt file name located inside your lists/ folder.
-
-Click Build Custom Node to generate the node logic.
-
-Click Download Code, save the file, and name it exactly __init__.py, replacing the existing script in the root folder.
-
-2. Canvas Workflow Mapping
-Inside the ComfyUI grid canvas interface:
-
-Right-click anywhere and locate your node via Custom Selection -> Universal Text Selector (or your custom display title).
-
-Wire your primary CLIP pipeline dot from your Model Loader directly into the node's clip input dot on the left.
-
-Route your outputs on the right side:
-
-PROMPT_STRING -> Connect this to prompt text combiners, custom wildcards, or visual display text debuggers.
-
-CONDITIONING -> Route this dot directly into your KSampler (positive / negative) inputs, instantly bypassing standard text box nodes.
-
-🛠️ Developer / Compilation Setup
-If you want to modify the companion app layout styles or tweak the core source generation engine:
-
-Make your code alterations inside generator/generator.html or generator/app.py.
-
-Open your command terminal inside the /generator folder and execute the one-click compilation automator script:
-
-Bash
-python build.py
-This script dynamically sets up an isolated Python virtual environment, installs the compression assets, strips module bloat, compiles the new optimized binary, moves it directly to the root path as Node Builder Assistant.exe, and purges temporary cache files automatically.

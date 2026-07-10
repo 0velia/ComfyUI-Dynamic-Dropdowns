@@ -18,7 +18,7 @@ if __name__ == "__main__":
     
     # Create the standalone window environment
     window = webview.create_window(
-        title="Universal Dropdown Node Generator",
+        title="ComfyUI Dynamic Dropdowns Node Generator",
         url=html_path,
         width=900,
         height=850,

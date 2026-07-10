@@ -39,8 +39,8 @@ ComfyUI-Dynamic-Dropdowns/
 
 ### Standard User Installation
 1. Download this repository or clone it directly into your ComfyUI nodes directory:
-```text
-   git clone [https://github.com/YOUR_USERNAME/ComfyUI-Dynamic-Dropdowns.git](https://github.com/YOUR_USERNAME/ComfyUI-Dynamic-Dropdowns.git)
+```bash
+   git clone [https://github.com/0velia/ComfyUI-Dynamic-Dropdowns.git](https://github.com/0velia/ComfyUI-Dynamic-Dropdowns.git)
 ```
 2. Navigate inside the `ComfyUI-Dynamic-Dropdowns` directory and create an empty folder named `lists`.
 3. Drop your text-attribute files (e.g., `outfits.txt`, `hairstyles.txt`) inside that `lists/` folder. Ensure text files feature exactly **one choice per line**, with no blank trailing lines.

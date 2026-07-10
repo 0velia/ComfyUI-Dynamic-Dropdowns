@@ -66,13 +66,13 @@ If you want to configure what dropdown columns display inside ComfyUI:
 4. Click **Build Custom Node** to generate the node logic.
 5. Click **Download Code**, save the file, and name it exactly **`__init__.py`**, replacing the existing script in the root folder.
 
-### 2. Canvas Workflow Mapping
-Inside the ComfyUI grid canvas interface:
-1. Right-click anywhere and locate your node via `Custom Selection -> Universal Text Selector` (or your custom display title).
-2. Wire your primary **`CLIP`** pipeline dot from your Model Loader directly into the node's **`clip`** input dot on the left.
-3. Route your outputs on the right side:
-    * **`PROMPT_STRING`** -> Connect this to prompt text combiners, custom wildcards, or visual display text debuggers.
-    * **`CONDITIONING`** -> Route this dot directly into your **`KSampler` (positive / negative)** inputs, instantly bypassing standard text box nodes.
+### 2. Canvas Workflow Mapping (Daisy-Chaining)
+Thanks to the optional input stacking architecture, you can link multiple dynamic dropdown nodes sequentially to keep your canvas beautifully organized:
+
+1. **Add Node 1 (e.g., Character Attributes):** Leave `input_string` empty. Select your core details (e.g., hair, clothing).
+2. **Add Node 2 (e.g., Environment & Framing):** Connect the `PROMPT_STRING` output from Node 1 directly into the `input_string` slot of Node 2.
+3. **Connect Pipeline Engines:** Wire your checkpoint's `CLIP` output directly into Node 2's `clip` slot. 
+4. **Final Delivery:** Route Node 2's `CONDITIONING` dot directly into your KSampler. The backend seamlessly combines the outputs (`character traits, framing choices, lighting styles`) into a single comma-separated string without duplicate punctuation artifacts, even if inputs are left unlinked.
 
 ---
 

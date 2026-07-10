@@ -32,7 +32,7 @@ ComfyUI-Dynamic-Dropdowns/
     ├── generator.html           # Desktop interface panel
     ├── requirements.txt         # Dev build dependencies
     └── build.py                 # Isolated one-click .exe compiler
-
+```
 ---
 
 ## ⚙️ Installation Guide

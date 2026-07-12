@@ -3,265 +3,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ComfyUI Dynamic Dropdowns Node Generator</title>
+    <title>Dynamic Dropdowns Node Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@0.344.0/dist/umd/lucide.min.js"></script>
+    
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #1e1e2e; color: #cdd6f4; margin: 0; padding: 20px; }
-        .container { max-width: 850px; margin: 0 auto; background: #252538; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-        h1, h2 { color: #89b4fa; margin-top: 0; }
-        .meta-group { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
-        .form-group { margin-bottom: 15px; flex-direction: column; display: flex; }
-        label { margin-bottom: 5px; font-weight: bold; font-size: 0.9em; color: #a6adc8; }
-        input { padding: 10px; background: #313244; border: 1px solid #45475a; color: #cdd6f4; border-radius: 4px; font-size: 1rem; }
-        input:focus { border-color: #89b4fa; outline: none; }
-        .dropdown-item { background: #11111b; padding: 15px; border-radius: 6px; margin-bottom: 15px; border-left: 4px solid #f38ba8; position: relative; }
-        .dropdown-item .remove-btn { position: absolute; right: 15px; top: 15px; background: #f38ba8; color: #11111b; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .upload-row { display: flex; gap: 10px; align-items: center; }
-        .upload-row input[type="text"] { flex-grow: 1; }
-        .file-label { display: inline-block; padding: 10px 15px; background: #cdd6f4; color: #11111b; font-weight: bold; border-radius: 4px; cursor: pointer; text-align: center; }
-        .file-input { display: none; }
-        .btn { padding: 12px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
-        .btn-add { background: #a6e3a1; color: #11111b; margin-bottom: 20px; }
-        .btn-build { background: #89b4fa; color: #11111b; width: 100%; font-size: 1.1em; margin-top: 10px; margin-bottom: 20px; }
-        .btn-action { background: #a6e3a1; color: #11111b; margin-right: 10px; }
-        .btn-download { background: #abe9b3; color: #11111b; }
-        .btn:hover { opacity: 0.9; }
-        .action-group { display: none; margin-top: 15px; }
-        pre { background: #11111b; padding: 15px; border-radius: 6px; overflow-x: auto; max-height: 400px; border: 1px solid #45475a; margin-top: 10px; }
-        code { font-family: 'Courier New', Courier, monospace; color: #a6e3a1; }
-        
-        /* Help Instructions Styles */
-        .help-panel { background: #181825; border: 1px solid #45475a; border-radius: 6px; padding: 20px; margin-bottom: 30px; }
-        .help-panel ul { padding-left: 20px; margin: 5px 0; }
-        .help-panel li { margin-bottom: 8px; color: #cdd6f4; }
-        .example-box { background: #313244; padding: 10px; border-radius: 4px; font-family: monospace; color: #f9e2af; margin-top: 5px; white-space: pre-line; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090f;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
     </style>
 </head>
 <body>
+    <div id="root"></div>
 
-<div class="container">
-    <h1>Universal Dropdown Node Generator</h1>
-    
-    <div class="help-panel">
-        <h2 style="color: #f9e2af; font-size: 1.2rem; margin-bottom: 10px;">📋 Self-Contained Folder Structure & Formatting</h2>
-        <p style="font-size: 0.95em; color: #a6adc8;">The generated node aggregates all dropdown choices into a single comma-separated output. The node scans a subfolder named <code>lists</code> inside your custom node directory:</p>
-        <div class="example-box" style="color: #a6e3a1;">ComfyUI/
-└── custom_nodes/
-    └── ComfyUI-Dynamic-Dropdowns/
-        ├── your_node_file.py
-        └── lists/
-            ├── hair_length.txt
-            ├── hair_color.txt
-            └── hairstyle.txt</div>
-        <ul style="margin-top: 15px;">
-            <li><strong>Formatting Rule:</strong> Your text files must feature exactly <strong>one option per line</strong>.</li>
-            <li><strong>Restrictions:</strong> No empty lines, no double quotes (<code>"</code>), and no backslashes (<code>\</code>). Validated on upload.</li>
-        </ul>
-    </div>
-    
-    <div class="meta-group">
-        <div class="form-group">
-            <label for="displayName">UI Display Name</label>
-            <input type="text" id="displayName" value="Universal Text Selector" oninput="autoGenerateClassName(this.value)">
-        </div>
-        <div class="form-group">
-            <label for="nodeName">Python Class Name (Automatically Generated)</label>
-            <input type="text" id="nodeName" value="UniversalTextSelectorNode" readonly style="background: #2b2b3c; color: #b4befe; cursor: not-allowed;">
-        </div>
-    </div>
+    <script type="text/babel">
+        const { useState, useRef, useCallback, useEffect } = React;
 
-    <h2>Dropdown Elements</h2>
-    <div id="dropdownsContainer"></div>
-    <button class="btn btn-add" onclick="addDropdown()">+ Add Dropdown Menu</button>
-    <button class="btn btn-build" onclick="generateNodeCode()">Build Custom Node</button>
+        // Custom simple Toast implementation to replace Sonner since we are in a standalone HTML file
+        const showToast = (message, type = "info") => {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+            const toast = document.createElement('div');
+            toast.className = `px-4 py-2.5 rounded-md text-xs font-medium shadow-xl transition-all duration-300 transform translate-y-2 opacity-0 text-white ${
+                type === 'success' ? 'bg-purple-600 border border-purple-400/20' : 
+                type === 'error' ? 'bg-red-600 border border-red-400/20' : 'bg-[#1a1a28] border border-white/10'
+            }`;
+            toast.innerText = message;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
 
-    <div id="resultSection" class="action-group">
-        <h2>Generated Code</h2>
-        <button class="btn btn-action" onclick="copyCode()">Copy Code</button>
-        <button class="btn btn-action btn-download" onclick="downloadCode()">Download Code</button>
-        <pre><code id="codeOutput"></code></pre>
-    </div>
-</div>
+        const INITIAL_SLOTS = [
+            { id: 1, name: "Style",       source: "custom", options: ["Studio Cinematic","Anime Flat","Editorial","Raw Documentary","Soft Portrait"], selectedIndex: 0, active: true },
+            { id: 2, name: "Lighting",    source: "demo",   options: ["Soft Natural","Harsh Neon","Golden Hour","Blue Hour","Studio Key"], selectedIndex: 0, active: true },
+            { id: 3, name: "Post-Process",source: "demo",   options: ["Orange Down","Teal & Orange","Matte Black","Film Grain","Clean"],  selectedIndex: 0, active: true },
+            { id: 4, name: "Camera",      source: "demo",   options: ["Studio Cinematic, Tyren Style","35mm f/1.4","Anamorphic","Wide Angle","Macro"], selectedIndex: 0, active: true },
+            { id: 5, name: "Composition", source: "custom", options: ["Studio Cinematic","Rule of Thirds","Centered","Dutch Angle","Overhead"], selectedIndex: 0, active: true },
+        ];
 
-<script>
-    let dropdownCount = 0;
+        let nextId = 20;
 
-    function autoGenerateClassName(val) {
-        let sanitized = val.replace(/[^a-zA-Z0-9 ]/g, '');
-        let camelCase = sanitized.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join('');
-        if(!camelCase.endsWith('Node')) {
-            camelCase += 'Node';
-        }
-        document.getElementById('nodeName').value = camelCase || "MyDropdownNode";
-    }
-
-    function addDropdown() {
-        dropdownCount++;
-        const container = document.getElementById('dropdownsContainer');
-        const div = document.createElement('div');
-        div.className = 'dropdown-item';
-        div.id = `item_${dropdownCount}`;
-        div.innerHTML = `
-            <button class="remove-btn" onclick="removeDropdown(${dropdownCount})">X</button>
-            <div class="form-group" style="margin-bottom: 10px;">
-                <label>Dropdown Label Name (e.g., hair_length, hair_color)</label>
-                <input type="text" class="input-label" value="attribute_${dropdownCount}" oninput="updateFileName(this)">
-            </div>
-            <div class="form-group">
-                <label>Associated Text File Name (Must match your file in custom_node/lists/)</label>
-                <div class="upload-row">
-                    <input type="text" class="input-file" value="attribute_${dropdownCount}.txt">
-                    <label class="file-label">
-                        Upload
-                        <input type="file" accept=".txt" class="file-input" onchange="handleFileUpload(this, ${dropdownCount})">
-                    </label>
-                </div>
-            </div>
-        `;
-        container.appendChild(div);
-    }
-
-    function removeDropdown(id) {
-        document.getElementById(`item_${id}`).remove();
-    }
-
-    function updateFileName(inputElement) {
-        const item = inputElement.closest('.dropdown-item');
-        const fileInput = item.querySelector('.input-file');
-        const sanitized = inputElement.value.toLowerCase().replace(/[^a-z0-9_]/g, '_');
-        fileInput.value = sanitized ? `${sanitized}.txt` : '';
-    }
-
-    function handleFileUpload(fileInput, id) {
-        if (fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const textContent = e.target.result;
-                const lines = textContent.split(/\r?\n/);
-                
-                for (let i = 0; i < lines.length; i++) {
-                    const currentLine = lines[i].trim();
-                    if (lines[i] === "" && i < lines.length - 1) {
-                        alert(`❌ File Rejected! Empty line detected on line ${i + 1}.`);
-                        fileInput.value = "";
-                        return;
-                    }
-                    if (currentLine.includes('"') || currentLine.includes('\\')) {
-                        alert(`❌ File Rejected! Illegal character (quotes or backslash) on line ${i + 1}.`);
-                        fileInput.value = "";
-                        return;
-                    }
-                }
-                
-                const fileName = file.name;
-                const item = document.getElementById(`item_${id}`);
-                item.querySelector('.input-file').value = fileName;
-                
-                const baseName = fileName.replace(/\.[^/.]+$/, "");
-                const cleanLabel = baseName.toLowerCase().replace(/[^a-z0-9_]/g, '_');
-                item.querySelector('.input-label').value = cleanLabel;
+        // ── Port Row Component ──
+        function Port({ label, type, color, side }) {
+            const dotStyle = {
+                background: color,
+                [side === "left" ? "left" : "right"]: "-6.5px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                boxShadow: `0 0 6px ${color}88`,
             };
-            
-            reader.readAsText(file);
-        }
-    }
-
-    function generateNodeCode() {
-        const nodeName = document.getElementById('nodeName').value;
-        const displayName = document.getElementById('displayName').value;
-        const items = document.querySelectorAll('.dropdown-item');
-        
-        if(items.length === 0) {
-            alert("Please add at least one dropdown element before building.");
-            return;
+            return (
+                <div className={`relative flex items-center h-8 ${side === "right" ? "flex-row-reverse" : ""}`}>
+                    <div className="absolute w-[13px] h-[13px] rounded-full border-2 border-[#0c0c14] shrink-0" style={dotStyle} />
+                    <span className="text-[11.5px] pl-4 mono" style={{ color }}>{label}</span>
+                    <span className="ml-auto pr-4 text-[10px] text-white/30 mono">{type}</span>
+                </div>
+            );
         }
 
-        let configLines = [];
-        let readLines = ['                "clip": ("CLIP",),']; 
-        let params = ['clip'];
-        let variableNames = [];
+        // ── Slot Card Component ──
+        function SlotCard({ slot, onSelect, onToggle, open, onOpen, onClose }) {
+            const value = slot.options[slot.selectedIndex];
 
-        items.forEach(item => {
-            const label = item.querySelector('.input-label').value.trim().replace(/[^a-zA-Z0-9_]/g, '_');
-            const file = item.querySelector('.input-file').value.trim();
-            
-            configLines.push(`        # Setup list for ${label}\n        ${label}_list = ["default_val"]\n        ${label}_path = os.path.join(lists_dir, "${file}")\n        if os.path.exists(${label}_path):\n            with open(${label}_path, "r", encoding="utf-8") as f:\n                lines = [l.strip() for l in f.readlines() if l.strip()]\n                if lines: ${label}_list = lines`);
-            
-            readLines.push(`                "${label}": (${label}_list, {"default": ${label}_list[0]}),`);
-            params.push(label);
-            variableNames.push(label);
-        });
+            return (
+                <div className="relative" style={{ borderBottom: "1px solid rgba(255,255,255,0.05)", opacity: slot.active ? 1 : 0.38, transition: "opacity 0.2s" }}>
+                    <div className="absolute left-0 top-0 bottom-0 w-[2.5px] rounded-r transition-colors duration-200" style={{ background: slot.active ? "#7c5cf6" : "transparent" }} />
 
-        const pythonCode = `import os
+                    <div className="pl-4 pr-3 pt-[7px] pb-[6px]">
+                        <div className="flex items-center justify-between mb-[2px]">
+                            <span className="text-[10px] tracking-wide font-medium text-white/40">
+                                {slot.name}
+                                {slot.source === "demo" && <span className="text-white/20 ml-1">(Demo)</span>}
+                                {slot.source === "custom" && <span className="text-white/20 ml-1">(Custom)</span>}
+                                {slot.source === "file" && <span className="text-cyan-500/50 ml-1">(.txt)</span>}
+                            </span>
 
-class ${nodeName}:
-    @classmethod
-    def INPUT_TYPES(cls):
-        current_dir = os.path.dirname(os.path.realpath(__file__))
-        lists_dir = os.path.join(current_dir, "lists")
-        
-        if not os.path.exists(lists_dir):
-            os.makedirs(lists_dir, exist_ok=True)
-        
-${configLines.join('\n\n')}
+                            <button onClick={onToggle} className="w-7 h-[14px] rounded-full relative transition-colors duration-200 shrink-0" style={{ background: slot.active ? "#7c5cf6" : "#2e2e44" }}>
+                                <div className="absolute top-[2px] w-[10px] h-[10px] rounded-full bg-white shadow-sm transition-all duration-200" style={{ left: slot.active ? "13px" : "2px" }} />
+                            </button>
+                        </div>
 
-        return {
-            "required": {
-${readLines.join('\n')}
-            }
+                        <div className="relative">
+                            <button onClick={(e) => { e.stopPropagation(); open ? onClose() : onOpen(); }} className="w-full flex items-center justify-between group">
+                                <span className="text-[12.5px] text-white/85 truncate leading-tight group-hover:text-white transition-colors text-left" style={{ maxWidth: "calc(100% - 20px)" }}>
+                                    {value}
+                                </span>
+                                <i data-lucide="chevron-down" className="w-3.5 h-3.5 text-white/25 transition-transform duration-150" style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}></i>
+                            </button>
+
+                            {open && (
+                                <div className="absolute top-full left-0 right-0 z-50 rounded-md overflow-hidden mt-1 bg-[#1e1e2e] border border-white/10 shadow-[0_12px_32px_rgba(0,0,0,0.7)]" onClick={e => e.stopPropagation()}>
+                                    {slot.options.map((opt, i) => (
+                                        <button key={i} onClick={() => { onSelect(i); onClose(); }} className="w-full text-left px-3 py-[7px] text-[11.5px] transition-colors hover:bg-white/5"
+                                            style={{
+                                                color: i === slot.selectedIndex ? "#a78bfa" : "rgba(255,255,255,0.72)",
+                                                background: i === slot.selectedIndex ? "rgba(124,92,246,0.12)" : "transparent",
+                                                borderBottom: i < slot.options.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                                            }}>
+                                            {opt}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
         }
 
-    RETURN_TYPES = ("STRING", "CONDITIONING",)
-    RETURN_NAMES = ("PROMPT_STRING", "CONDITIONING",)
-    FUNCTION = "process_selection"
-    CATEGORY = "Custom Selection"
+        // ── Main App Loop ──
+        function App() {
+            const [slots, setSlots] = useState(INITIAL_SLOTS);
+            const [openId, setOpenId] = useState(null);
+            const fileInputRef = useRef(null);
 
-    def process_selection(self, ${params.join(', ')}):
-        selections = [${variableNames.join(', ')}]
-        combined_text = ", ".join([str(item) for item in selections if item])
-        
-        tokens = clip.tokenize(combined_text)
-        cond, pooled = clip.encode_from_tokens(tokens, return_pooled=True)
-        conditioning_output = [[cond, {"pooled_output": pooled}]]
+            // Trigger lucide icon hydration on layout mount/updates
+            useEffect(() => {
+                if (window.lucide) {
+                    window.lucide.createIcons();
+                }
+            }, [slots, openId]);
 
-        return (combined_text, conditioning_output,)
+            const select = useCallback((id, i) => {
+                setSlots(prev => prev.map(s => s.id === id ? { ...s, selectedIndex: i } : s));
+            }, []);
 
-NODE_CLASS_MAPPINGS = {
-    "${nodeName}": ${nodeName}
-}
+            const toggle = useCallback((id) => {
+                setSlots(prev => prev.map(s => s.id === id ? { ...s, active: !s.active } : s));
+            }, []);
 
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "${nodeName}": "${displayName}"
-}
-`;
+            const addSlot = () => {
+                const id = nextId++;
+                setSlots(prev => [
+                    ...prev,
+                    { id, name: `Slot ${prev.length + 1}`, options: ["(empty — load a file)"], selectedIndex: 0, active: true, source: "custom" },
+                ]);
+            };
 
-        document.getElementById('codeOutput').textContent = pythonCode;
-        document.getElementById('resultSection').style.display = 'block';
-    }
+            const removeSlot = () => {
+                setSlots(prev => {
+                    if (!prev.length) return prev;
+                    const name = prev[prev.length - 1].name;
+                    showToast(`Removed "${name}"`);
+                    return prev.slice(0, -1);
+                });
+            };
 
-    function copyCode() {
-        const codeText = document.getElementById('codeOutput').textContent;
-        navigator.clipboard.writeText(codeText).then(() => {
-            alert("Code copied to clipboard!");
-        });
-    }
+            const handleFile = (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const rawFileName = file.name;
+                const name = rawFileName.replace(/\.txt$/i, "").replace(/[-_]/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+                
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    const textContent = ev.target?.result;
+                    const lines = textContent.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+                    if (!lines.length) { showToast("File is empty.", "error"); return; }
+                    
+                    const id = nextId++;
+                    setSlots(prev => [...prev, { id, name, options: lines, selectedIndex: 0, active: true, source: "file" }]);
+                    
+                    // Python PyWebView Asset Pipeline sync hooks
+                    if (window.pywebview?.api?.save_list_asset) {
+                        window.pywebview.api.save_list_asset(rawFileName, textContent);
+                    }
+                    
+                    showToast(`Loaded "${name}" — ${lines.length} options`, "success");
+                };
+                reader.readAsText(file);
+                e.target.value = "";
+            };
 
-    function downloadCode() {
-        const codeText = document.getElementById('codeOutput').textContent;
-        const nodeName = document.getElementById('nodeName').value;
-        const blob = new Blob([codeText], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${nodeName.toLowerCase()}.py`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
+            const buildCustomNode = () => {
+                // Call Python engine wrapper to compile the node config list mappings
+                if (window.pywebview?.api?.build_node) {
+                    window.pywebview.api.build_node(JSON.stringify(slots));
+                    showToast("Custom Node Code generated successfully!", "success");
+                } else {
+                    showToast("Local workspace compilation execution only available inside Assistant app wrapper.", "error");
+                }
+            };
 
-    addDropdown();
-</script>
+            return (
+                <div className="min-h-screen w-full flex flex-col items-center justify-center overflow-hidden relative select-none" onClick={() => setOpenId(null)}>
+                    {/* Toast Notification Mount Wrapper */}
+                    <div id="toast-container" className="absolute bottom-16 right-5 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
+                    {/* dot background layout grid */}
+                    <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.038) 1px, transparent 1px)", backgroundSize: "28px 28px" }} />
+
+                    {/* subtle ambient background glow */}
+                    <div className="absolute w-[600px] h-[600px] rounded-full pointer-events-none -translate-x-1/4" style={{ background: "radial-gradient(circle, rgba(50,30,110,0.14) 0%, transparent 65%)" }} />
+
+                    {/* ── Node Card Wrapper ── */}
+                    <div className="relative z-10 rounded-xl overflow-visible bg-gradient-to-b from-[#1a1a28] to-[#161622]" style={{ width: "340px", boxShadow: "0 0 0 1px rgba(255,255,255,0.07), 0 0 0 3px rgba(80,60,180,0.15), 0 32px 80px rgba(0,0,0,0.75)" }} onClick={e => e.stopPropagation()}>
+                        
+                        {/* ── Title Bar ── */}
+                        <div className="flex items-center gap-2 px-3 py-[10px] rounded-t-xl bg-gradient-to-b from-[#1f1f30] to-[#191926]" style={{ borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+                            <div className="w-5 h-5 rounded-md flex items-center justify-center shrink-0 bg-purple-600/25">
+                                <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                                    <rect x="0.5" y="0.5" width="4" height="4" rx="1" fill="#a78bfa"/>
+                                    <rect x="6.5" y="0.5" width="4" height="4" rx="1" fill="#a78bfa" opacity="0.5"/>
+                                    <rect x="0.5" y="6.5" width="4" height="4" rx="1" fill="#a78bfa" opacity="0.5"/>
+                                    <rect x="6.5" y="6.5" width="4" height="4" rx="1" fill="#a78bfa" opacity="0.25"/>
+                                </svg>
+                            </div>
+                            <span className="text-white/90 text-[12.5px] font-semibold tracking-tight">Dynamic Dropdowns</span>
+                            <span className="text-white/35 text-[11px] font-normal">(Pro Mode)</span>
+                        </div>
+
+                        {/* ── Output Pipeline Slots ── */}
+                        <div style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                            <Port label="CLIP" type="CLIP" color="#c084fc" side="left" />
+                            <div style={{ borderTop: "1px solid rgba(255,255,255,0.04)" }} />
+                            <Port label="Input String" type="PROMPT_STRING" color="#c084fc" side="left" />
+                            
+                            {/* Simulated right-side ports block wrapper */}
+                            <div className="absolute right-0 top-[51px]" style={{ width: "50%" }}>
+                                <div style={{ height: "32px", position: "relative" }}>
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-[#ffe66d]/50 mono">PROMPT_STRING</span>
+                                    <div className="absolute rounded-full border-2 border-[#0c0c14]" style={{ right: "-6.5px", top: "50%", transform: "translateY(-50%)", width: 13, height: 13, background: "#ffe66d", boxShadow: "0 0 6px #ffe66d88" }} />
+                                </div>
+                                <div style={{ height: "32px", position: "relative", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-[#f97316]/50 mono">CONDITIONING</span>
+                                    <div className="absolute rounded-full border-2 border-[#0c0c14]" style={{ right: "-6.5px", top: "50%", transform: "translateY(-50%)", width: 13, height: 13, background: "#f97316", boxShadow: "0 0 6px #f9731688" }} />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ── Selection Dropdowns List Content ── */}
+                        <div className="max-h-[280px] overflow-y-auto custom-scrollbar">
+                            {slots.length === 0 && (
+                                <div className="text-center py-6 text-[11px] text-white/20 italic">
+                                    No slots — add one or load a .txt file
+                                </div>
+                            )}
+                            {slots.map(slot => (
+                                <SlotCard key={slot.id} slot={slot} open={openId === slot.id} onOpen={() => setOpenId(slot.id)} onClose={() => setOpenId(null)} onSelect={i => select(slot.id, i)} onToggle={() => toggle(slot.id)} />
+                            ))}
+                        </div>
+
+                        {/* ── Updated Horizontal Bottom Button Actions Bar (Figma Design Spec Alignment) ── */}
+                        <div className="px-3 py-3 flex flex-row items-center justify-between gap-2 rounded-b-xl w-full" style={{ borderTop: "1px solid rgba(255,255,255,0.06)", background: "rgba(0,0,0,0.2)" }}>
+                            <div className="flex items-center gap-2 flex-1">
+                                <button onClick={addSlot} className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-white/75 hover:text-white transition-colors whitespace-nowrap bg-white/5 border border-white/10 flex-1">
+                                    <i data-lucide="plus" className="w-3 h-3 text-white/75"></i>
+                                    Add Slot
+                                </button>
+
+                                <button onClick={removeSlot} className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-md text-[11px] font-medium text-white/75 hover:text-white transition-colors whitespace-nowrap bg-white/5 border border-white/10 flex-1">
+                                    <i data-lucide="minus" className="w-3 h-3 text-white/75"></i>
+                                    Remove Slot
+                                </button>
+                            </div>
+
+                            {/* Load dynamic list .txt file element block */}
+                            <button onClick={() => fileInputRef.current?.click()} className="p-1.5 rounded-md text-white/40 hover:text-cyan-400 transition-colors shrink-0 bg-white/5 border border-white/10" title="Load .txt file as new slot">
+                                <i data-lucide="folder-open" className="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Integrated System Build Node Control Trigger Button Group */}
+                    <div className="mt-4 z-10">
+                        <button onClick={buildCustomNode} className="px-6 py-2 bg-purple-600 hover:bg-purple-700 border border-purple-400/20 text-white font-medium text-xs rounded-md shadow-lg transition-all transform active:scale-95">
+                            Build Custom Node Code (__init__.py)
+                        </button>
+                    </div>
+
+                    <input ref={fileInputRef} type="file" accept=".txt" className="hidden" onChange={handleFile} />
+
+                    <p className="absolute bottom-4 text-[10px] text-white/20 tracking-wide">
+                        Click a value to open its dropdown · Use the folder icon to load a .txt file
+                    </p>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
 </body>
 </html>
